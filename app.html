@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <h1>WebSocket サーバーとの通信</h1>
+    <!-- プレースホルダー画像を最初に表示 -->
+    <img id="screenshot" src="./screenshots/screenshot.jpeg" alt="スクリーンショット" style="max-width: 100%; height: auto;"/>
+
+    <script>
+        // WebSocket サーバーに接続
+        const socket = new WebSocket("ws://localhost:8080");
+
+        // サーバー接続が開いたときの処理
+        socket.addEventListener("open", (event) => {
+            console.log("サーバーに接続されました");
+            socket.send("Hello Server!"); // サーバーにメッセージ送信
+        });
+
+        // サーバーからメッセージを受け取ったときの処理
+        socket.addEventListener("message", (event) => {
+            console.log("サーバーからのメッセージ:", event.data); // サーバーからのメッセージを表示
+
+            // サーバーから受け取った画像データを処理
+            const imageData = event.data;
+
+            // バイナリデータをbase64に変換して表示
+            if (imageData instanceof Blob) {
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    const base64Image = reader.result;
+                    // 画像を表示
+                    document.getElementById("screenshot").src = base64Image;  
+                };
+                reader.readAsDataURL(imageData);  // Blobをbase64データURLに変換
+            }
+        });
+
+        // エラーハンドリング
+        socket.addEventListener("error", (event) => {
+            console.error("WebSocket エラー:", event);
+        });
+
+        // サーバー接続が閉じられたときの処理
+        socket.addEventListener("close", (event) => {
+            console.log("サーバーとの接続が閉じられました");
+        });
+    </script>
+</body>
+</html>
